@@ -80,10 +80,10 @@ private:
   // ROS node handle
   ros::NodeHandle nh_;
 
-  unsigned int n_dof_;
+  int n_dof_;
+  bool external_axes_;
 
   std::vector<std::string> joint_names_;
-
   std::vector<double> joint_position_;
   std::vector<double> joint_velocity_;
   std::vector<double> joint_effort_;
@@ -98,7 +98,8 @@ private:
   std::vector<double> rsi_joint_position_corrections_;
   unsigned long long ipoc_;
 
-  std::unique_ptr<realtime_tools::RealtimePublisher<std_msgs::String> > rt_rsi_pub_;
+  std::unique_ptr<realtime_tools::RealtimePublisher<std_msgs::String> > rt_rsi_recv_;
+  std::unique_ptr<realtime_tools::RealtimePublisher<std_msgs::String> > rt_rsi_send_;
 
   std::unique_ptr<UDPServer> server_;
   std::string local_host_;

@@ -53,10 +53,10 @@ private:
 
 public:
   RSIState() :
-    positions(6, 0.0),
-    initial_positions(6, 0.0),
-    cart_position(6, 0.0),
-    initial_cart_position(6, 0.0)
+    positions(12, 0.0),
+    initial_positions(12, 0.0),
+    cart_position(12, 0.0),
+    initial_cart_position(12, 0.0)
   {
     xml_doc_.resize(1024);
   }
@@ -77,10 +77,10 @@ public:
 
 RSIState::RSIState(std::string xml_doc) :
   xml_doc_(xml_doc),
-  positions(6, 0.0),
-  initial_positions(6, 0.0),
-  cart_position(6, 0.0),
-  initial_cart_position(6, 0.0)
+  positions(12, 0.0),
+  initial_positions(12, 0.0),
+  cart_position(12, 0.0),
+  initial_cart_position(12, 0.0)
 {
   // Parse message from robot
   TiXmlDocument bufferdoc;
@@ -122,6 +122,26 @@ RSIState::RSIState(std::string xml_doc) :
   // Get the IPOC timestamp
   TiXmlElement* ipoc_el = rob->FirstChildElement("IPOC");
   ipoc = std::stoull(ipoc_el->FirstChild()->Value());
+  // External axes actual position
+  TiXmlElement* EIPos_el = rob->FirstChildElement("EIPos");
+  if (EIPos_el) {
+    EIPos_el->Attribute("E1", &positions[6]);
+    EIPos_el->Attribute("E2", &positions[7]);
+    EIPos_el->Attribute("E3", &positions[8]);
+    EIPos_el->Attribute("E4", &positions[9]);
+    EIPos_el->Attribute("E5", &positions[10]);
+    EIPos_el->Attribute("E6", &positions[11]);
+  }
+  // External axes setpoint position
+  TiXmlElement* ESPos_el = rob->FirstChildElement("ESPos");
+  if (ESPos_el) {
+    ESPos_el->Attribute("E1", &initial_positions[6]);
+    ESPos_el->Attribute("E2", &initial_positions[7]);
+    ESPos_el->Attribute("E3", &initial_positions[8]);
+    ESPos_el->Attribute("E4", &initial_positions[9]);
+    ESPos_el->Attribute("E5", &initial_positions[10]);
+    ESPos_el->Attribute("E6", &initial_positions[11]);
+  }
 }
 
 } // namespace kuka_rsi_hw_interface
