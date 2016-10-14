@@ -46,14 +46,20 @@ namespace kuka_rsi_hw_interface
 {
 
 KukaHardwareInterface::KukaHardwareInterface() :
-    joint_position_(6, 0.0), joint_velocity_(6, 0.0), joint_effort_(6, 0.0), joint_position_command_(6, 0.0), joint_velocity_command_(
-        6, 0.0), joint_effort_command_(6, 0.0), joint_names_(6), rsi_initial_joint_positions_(6, 0.0), rsi_joint_position_corrections_(
-        6, 0.0), ipoc_(0), n_dof_(6)
+    joint_position_(12, 0.0), joint_velocity_(12, 0.0), joint_effort_(12, 0.0), joint_position_command_(12, 0.0), joint_velocity_command_(
+        12, 0.0), joint_effort_command_(12, 0.0), joint_names_(12), rsi_initial_joint_positions_(12, 0.0), rsi_joint_position_corrections_(
+        12, 0.0), ipoc_(0), n_dof_(6)
 {
   in_buffer_.resize(1024);
   out_buffer_.resize(1024);
   remote_host_.resize(1024);
   remote_port_.resize(1024);
+
+  nh_.param("rsi/external_axes", external_axes_, false);
+  ROS_INFO_STREAM_NAMED("kuka_hardware_interface", "External axes: " << external_axes_);
+
+  nh_.param("rsi/n_dof", n_dof_, 6);
+  ROS_INFO_STREAM_NAMED("kuka_hardware_interface", "DOF: " << n_dof_);
 
   if (!nh_.getParam("controller_joint_names", joint_names_))
   {
@@ -98,15 +104,19 @@ bool KukaHardwareInterface::read(const ros::Time time, const ros::Duration perio
     return false;
   }
 
-  if (rt_rsi_pub_->trylock()){
-    rt_rsi_pub_->msg_.data = in_buffer_;
-    rt_rsi_pub_->unlockAndPublish();
+  if (rt_rsi_recv_->trylock()){
+    rt_rsi_recv_->msg_.data = in_buffer_;
+    rt_rsi_recv_->unlockAndPublish();
   }
 
   rsi_state_ = RSIState(in_buffer_);
-  for (std::size_t i = 0; i < n_dof_; ++i)
+  for (std::size_t i = 0; i < 6; ++i)
   {
     joint_position_[i] = DEG2RAD * rsi_state_.positions[i];
+  }
+  for (std::size_t i=6; i < n_dof_; ++i)
+  {
+    joint_position_[i] = rsi_state_.positions[i];
   }
   ipoc_ = rsi_state_.ipoc;
 
@@ -117,14 +127,22 @@ bool KukaHardwareInterface::write(const ros::Time time, const ros::Duration peri
 {
   out_buffer_.resize(1024);
 
-  for (std::size_t i = 0; i < n_dof_; ++i)
+  for (std::size_t i = 0; i < 6; ++i)
   {
     rsi_joint_position_corrections_[i] = (RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i];
   }
 
-  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_).xml_doc;
+  for (std::size_t i = 6; i < n_dof_; ++i)
+  {
+    rsi_joint_position_corrections_[i] = joint_position_command_[i] - rsi_initial_joint_positions_[i];
+  }
+  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, external_axes_).xml_doc;
   server_->send(out_buffer_);
 
+  if(rt_rsi_send_->trylock()) {
+    rt_rsi_send_->msg_.data = out_buffer_;
+    rt_rsi_send_->unlockAndPublish();
+  }
   return true;
 }
 
@@ -145,7 +163,7 @@ void KukaHardwareInterface::start()
     rsi_initial_joint_positions_[i] = rsi_state_.initial_positions[i];
   }
   ipoc_ = rsi_state_.ipoc;
-  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_).xml_doc;
+  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, external_axes_).xml_doc;
   server_->send(out_buffer_);
   // Set receive timeout to 1 second
   server_->set_timeout(1000);
@@ -165,7 +183,9 @@ void KukaHardwareInterface::configure()
     ROS_ERROR("Failed to get RSI listen address or listen port from parameter server!");
     throw std::runtime_error("Failed to get RSI listen address or listen port from parameter server.");
   }
-  rt_rsi_pub_.reset(new realtime_tools::RealtimePublisher<std_msgs::String>(nh_, "rsi_xml_doc", 3));
+
+  rt_rsi_recv_.reset(new realtime_tools::RealtimePublisher<std_msgs::String>(nh_, "rsi_xml_doc_recv", 3));
+  rt_rsi_send_.reset(new realtime_tools::RealtimePublisher<std_msgs::String>(nh_, "rsi_xml_doc_send", 3));
 }
 
 } // namespace kuka_rsi_hardware_interface
