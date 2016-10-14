@@ -87,44 +87,63 @@ RSIState::RSIState(std::string xml_doc) :
   bufferdoc.Parse(xml_doc_.c_str());
   // Get the Rob node:
   TiXmlElement* rob = bufferdoc.FirstChildElement("Rob");
+
   // Extract axis specific actual position
   TiXmlElement* AIPos_el = rob->FirstChildElement("AIPos");
-  AIPos_el->Attribute("A1", &positions[0]);
-  AIPos_el->Attribute("A2", &positions[1]);
-  AIPos_el->Attribute("A3", &positions[2]);
-  AIPos_el->Attribute("A4", &positions[3]);
-  AIPos_el->Attribute("A5", &positions[4]);
-  AIPos_el->Attribute("A6", &positions[5]);
+  if (AIPos_el)
+  {
+    AIPos_el->Attribute("A1", &positions[0]);
+    AIPos_el->Attribute("A2", &positions[1]);
+    AIPos_el->Attribute("A3", &positions[2]);
+    AIPos_el->Attribute("A4", &positions[3]);
+    AIPos_el->Attribute("A5", &positions[4]);
+    AIPos_el->Attribute("A6", &positions[5]);
+  }
+
   // Extract axis specific setpoint position
   TiXmlElement* ASPos_el = rob->FirstChildElement("ASPos");
-  ASPos_el->Attribute("A1", &initial_positions[0]);
-  ASPos_el->Attribute("A2", &initial_positions[1]);
-  ASPos_el->Attribute("A3", &initial_positions[2]);
-  ASPos_el->Attribute("A4", &initial_positions[3]);
-  ASPos_el->Attribute("A5", &initial_positions[4]);
-  ASPos_el->Attribute("A6", &initial_positions[5]);
+  if (ASPos_el)
+  {
+    ASPos_el->Attribute("A1", &initial_positions[0]);
+    ASPos_el->Attribute("A2", &initial_positions[1]);
+    ASPos_el->Attribute("A3", &initial_positions[2]);
+    ASPos_el->Attribute("A4", &initial_positions[3]);
+    ASPos_el->Attribute("A5", &initial_positions[4]);
+    ASPos_el->Attribute("A6", &initial_positions[5]);
+  }
+
   // Extract cartesian actual position
   TiXmlElement* RIst_el = rob->FirstChildElement("RIst");
-  RIst_el->Attribute("X", &cart_position[0]);
-  RIst_el->Attribute("Y", &cart_position[1]);
-  RIst_el->Attribute("Z", &cart_position[2]);
-  RIst_el->Attribute("A", &cart_position[3]);
-  RIst_el->Attribute("B", &cart_position[4]);
-  RIst_el->Attribute("C", &cart_position[5]);
+  if (RIst_el)
+  {
+    RIst_el->Attribute("X", &cart_position[0]);
+    RIst_el->Attribute("Y", &cart_position[1]);
+    RIst_el->Attribute("Z", &cart_position[2]);
+    RIst_el->Attribute("A", &cart_position[3]);
+    RIst_el->Attribute("B", &cart_position[4]);
+    RIst_el->Attribute("C", &cart_position[5]);
+  }
+
   // Extract cartesian actual position
   TiXmlElement* RSol_el = rob->FirstChildElement("RSol");
-  RSol_el->Attribute("X", &initial_cart_position[0]);
-  RSol_el->Attribute("Y", &initial_cart_position[1]);
-  RSol_el->Attribute("Z", &initial_cart_position[2]);
-  RSol_el->Attribute("A", &initial_cart_position[3]);
-  RSol_el->Attribute("B", &initial_cart_position[4]);
-  RSol_el->Attribute("C", &initial_cart_position[5]);
+  if (RSol_el)
+  {
+    RSol_el->Attribute("X", &initial_cart_position[0]);
+    RSol_el->Attribute("Y", &initial_cart_position[1]);
+    RSol_el->Attribute("Z", &initial_cart_position[2]);
+    RSol_el->Attribute("A", &initial_cart_position[3]);
+    RSol_el->Attribute("B", &initial_cart_position[4]);
+    RSol_el->Attribute("C", &initial_cart_position[5]);
+  }
+
   // Get the IPOC timestamp
   TiXmlElement* ipoc_el = rob->FirstChildElement("IPOC");
   ipoc = std::stoull(ipoc_el->FirstChild()->Value());
+
   // External axes actual position
   TiXmlElement* EIPos_el = rob->FirstChildElement("EIPos");
-  if (EIPos_el) {
+  if (EIPos_el)
+  {
     EIPos_el->Attribute("E1", &positions[6]);
     EIPos_el->Attribute("E2", &positions[7]);
     EIPos_el->Attribute("E3", &positions[8]);
@@ -134,7 +153,8 @@ RSIState::RSIState(std::string xml_doc) :
   }
   // External axes setpoint position
   TiXmlElement* ESPos_el = rob->FirstChildElement("ESPos");
-  if (ESPos_el) {
+  if (ESPos_el)
+  {
     ESPos_el->Attribute("E1", &initial_positions[6]);
     ESPos_el->Attribute("E2", &initial_positions[7]);
     ESPos_el->Attribute("E3", &initial_positions[8]);
