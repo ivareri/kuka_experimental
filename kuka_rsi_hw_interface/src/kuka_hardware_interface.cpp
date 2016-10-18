@@ -98,7 +98,6 @@ KukaHardwareInterface::~KukaHardwareInterface()
 bool KukaHardwareInterface::read(const ros::Time time, const ros::Duration period)
 {
   in_buffer_.resize(1024);
-
   if (server_->recv(in_buffer_) == 0)
   {
     return false;
@@ -114,10 +113,12 @@ bool KukaHardwareInterface::read(const ros::Time time, const ros::Duration perio
   {
     joint_position_[i] = DEG2RAD * rsi_state_.positions[i];
   }
-  for (std::size_t i=6; i < n_dof_; ++i)
+
+  for (std::size_t i = 6; i < n_dof_; ++i)
   {
-    joint_position_[i] = rsi_state_.positions[i];
+    joint_position_[i] = DEG2RAD * rsi_state_.positions[i] / 1000;
   }
+
   ipoc_ = rsi_state_.ipoc;
 
   return true;
@@ -134,8 +135,9 @@ bool KukaHardwareInterface::write(const ros::Time time, const ros::Duration peri
 
   for (std::size_t i = 6; i < n_dof_; ++i)
   {
-    rsi_joint_position_corrections_[i] = joint_position_command_[i] - rsi_initial_joint_positions_[i];
+    rsi_joint_position_corrections_[i] = (1000 * RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i];
   }
+
   out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, external_axes_).xml_doc;
   server_->send(out_buffer_);
 
@@ -154,6 +156,7 @@ void KukaHardwareInterface::start()
   ROS_INFO_STREAM_NAMED("kuka_hardware_interface", "Waiting for robot!");
 
   int bytes = server_->recv(in_buffer_);
+  bytes = server_->recv(in_buffer_);
 
   // Drop empty <rob> frame with RSI <= 2.3
   if (bytes < 100)
@@ -162,12 +165,20 @@ void KukaHardwareInterface::start()
   }
 
   rsi_state_ = RSIState(in_buffer_);
-  for (std::size_t i = 0; i < n_dof_; ++i)
+  for (std::size_t i = 0; i < 6; ++i)
   {
     joint_position_[i] = DEG2RAD * rsi_state_.positions[i];
     joint_position_command_[i] = joint_position_[i];
     rsi_initial_joint_positions_[i] = rsi_state_.initial_positions[i];
   }
+
+  for (std::size_t i = 6; i < n_dof_; ++i)
+  {
+    joint_position_[i] = DEG2RAD * rsi_state_.positions[i] / 1000;
+    joint_position_command_[i] = joint_position_[i];
+    rsi_initial_joint_positions_[i] = rsi_state_.initial_positions[i];
+  }
+
   ipoc_ = rsi_state_.ipoc;
   out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, external_axes_).xml_doc;
   server_->send(out_buffer_);
