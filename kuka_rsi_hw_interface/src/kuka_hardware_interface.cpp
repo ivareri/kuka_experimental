@@ -135,7 +135,7 @@ bool KukaHardwareInterface::write(const ros::Time time, const ros::Duration peri
 
   for (std::size_t i = 6; i < n_dof_; ++i)
   {
-    rsi_joint_position_corrections_[i] = (1000 * RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i];
+    rsi_joint_position_corrections_[i] = ((1000 * RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i]) / 100;
   }
 
   out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, external_axes_).xml_doc;
