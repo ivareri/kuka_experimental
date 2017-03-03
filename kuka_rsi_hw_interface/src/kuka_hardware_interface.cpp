@@ -118,6 +118,8 @@ bool KukaHardwareInterface::read(const ros::Time time, const ros::Duration perio
   {
     joint_position_[i] = DEG2RAD * rsi_state_.positions[i] / 1000;
   }
+  for (std::size_t i = 0; i < n_dof_; ++i)
+	  rsi_initial_joint_positions_[i] = rsi_state_.positions[i];
 
   ipoc_ = rsi_state_.ipoc;
 
@@ -130,17 +132,21 @@ bool KukaHardwareInterface::write(const ros::Time time, const ros::Duration peri
 
   for (std::size_t i = 0; i < 6; ++i)
   {
-    rsi_joint_position_corrections_[i] = (RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i];
+//   rsi_joint_position_corrections_[i] = (RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i];
+      rsi_joint_position_corrections_[i] = 0;
   }
+
 
   for (std::size_t i = 6; i < n_dof_; ++i)
   {
-    rsi_joint_position_corrections_[i] = ((1000 * RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i]);
+//	ROS_ERROR_STREAM("External positions should be: " + std::to_string(((1000 * RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i])));
+//     rsi_joint_position_corrections_[i] = ((1000 * RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i]);
+     rsi_joint_position_corrections_[i] = 0;
   }
 
+  rsi_joint_position_corrections_[6] = ((1000 * RAD2DEG * joint_position_command_[6]) - rsi_initial_joint_positions_[6]) * DEG2RAD;
   out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, external_axes_).xml_doc;
   server_->send(out_buffer_);
-
   if(rt_rsi_send_->trylock()) {
     rt_rsi_send_->msg_.data = out_buffer_;
     rt_rsi_send_->unlockAndPublish();
@@ -168,14 +174,14 @@ void KukaHardwareInterface::start()
   {
     joint_position_[i] = DEG2RAD * rsi_state_.positions[i];
     joint_position_command_[i] = joint_position_[i];
-    rsi_initial_joint_positions_[i] = rsi_state_.initial_positions[i];
+    rsi_initial_joint_positions_[i] = rsi_state_.positions[i];
   }
 
   for (std::size_t i = 6; i < n_dof_; ++i)
   {
     joint_position_[i] = DEG2RAD * rsi_state_.positions[i] / 1000;
     joint_position_command_[i] = joint_position_[i];
-    rsi_initial_joint_positions_[i] = rsi_state_.initial_positions[i];
+    rsi_initial_joint_positions_[i] = rsi_state_.positions[i];
   }
 
   ipoc_ = rsi_state_.ipoc;
