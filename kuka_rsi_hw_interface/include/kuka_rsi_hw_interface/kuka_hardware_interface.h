@@ -55,6 +55,7 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <hardware_interface/force_torque_sensor_interface.h>
 
 // Timers
 #include <chrono>
@@ -83,6 +84,8 @@ private:
   unsigned int n_dof_;
 
   std::vector<std::string> joint_names_;
+  std::string force_torque_sensor_topic_;
+  std::string force_torque_sensor_frame_;
 
   std::vector<double> joint_position_;
   std::vector<double> joint_velocity_;
@@ -90,6 +93,8 @@ private:
   std::vector<double> joint_position_command_;
   std::vector<double> joint_velocity_command_;
   std::vector<double> joint_effort_command_;
+  double force_[3];
+  double torque_[3];
 
   // RSI
   RSIState rsi_state_;
@@ -116,6 +121,7 @@ private:
   // Interfaces
   hardware_interface::JointStateInterface joint_state_interface_;
   hardware_interface::PositionJointInterface position_joint_interface_;
+  hardware_interface::ForceTorqueSensorInterface force_torque_sensor_interface_;
 
 public:
 

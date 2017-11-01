@@ -23,6 +23,7 @@ def create_rsi_xml_rob(act_joint_pos, setpoint_joint_pos, timeout_count, ipoc):
     ET.SubElement(root, 'ASPos', {'A1':str(qd[0]), 'A2':str(qd[1]), 'A3':str(qd[2]),
                                   'A4':str(qd[3]), 'A5':str(qd[4]), 'A6':str(qd[5])})
     ET.SubElement(root, 'Delay', {'D':str(timeout_count)})
+    ET.SubElement(root, 'FTC', {'Fx' : '0.0', 'Fy' : '0.0', 'Fz' : '0.0', 'Mx' : '0.0', 'My' : '0.0', 'Mz' : '0.0'})
     ET.SubElement(root, 'IPOC').text=str(ipoc)
     return ET.tostring(root)
 

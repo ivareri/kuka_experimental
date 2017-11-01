@@ -18,7 +18,7 @@
 
     <!-- Load controllers -->
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
-        args="position_trajectory_controller joint_state_controller --shutdown-timeout 1"/>
+        args="position_trajectory_controller joint_state_controller force_torque_sensor_controller --shutdown-timeout 1"/>
     <!-- Load robot state publisher -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
