@@ -7,10 +7,10 @@
         <transmission name="${prefix}joint_a1_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}joint_a1">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}motor_a1">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
                 <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
@@ -19,10 +19,10 @@
         <transmission name="${prefix}joint_a2_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}joint_a2">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}motor_a2">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
                 <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
@@ -31,10 +31,10 @@
         <transmission name="${prefix}joint_a3_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}joint_a3">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}motor_a3">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
                 <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
@@ -43,10 +43,10 @@
         <transmission name="${prefix}joint_a4_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}joint_a4">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}motor_a4">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
                 <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
@@ -55,10 +55,10 @@
         <transmission name="${prefix}joint_a5_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}joint_a5">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}motor_a5">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
                 <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
@@ -67,10 +67,10 @@
         <transmission name="${prefix}joint_a6_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}joint_a6">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}motor_a6">
-                <hardwareInterface>PositionJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
                 <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
