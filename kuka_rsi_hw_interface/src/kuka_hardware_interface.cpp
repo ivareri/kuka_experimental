@@ -63,19 +63,21 @@ KukaHardwareInterface::KukaHardwareInterface() :
       "'controller_joint_names' on the parameter server.");
   }
 
-  nh_.param(std::string("force_torque_sensor_topic"), force_torque_sensor_topic_, std::string("ft_sensor/raw"));
-  if (!nh_.hasParam("force_torque_sensor_topic"))
-  {
-    ROS_WARN("Cannot find parameter 'force_torque_sensor_topic' on the parameter server, using default "
-             "'ft_sensor/raw'");
-  }
 
-  if (!nh_.getParam("force_torque_sensor_frame", force_torque_sensor_frame_))
+  if (nh_.getParam("rsi/force_torque_sensor_frame", force_torque_sensor_frame_))
   {
-    ROS_ERROR("Cannot find required parameter 'force_torque_sensor_frame' "
-              "on the parameter server.");
-    throw std::runtime_error("Cannot find required parameter "
-                             "'force_torque_sensor_frame' on the parameter server.");
+    ROS_INFO_STREAM_NAMED("hardware_interface", "Support for force torque sensor enabled");
+    use_force_torque_sensor_ = true;
+    nh_.param(std::string("rsi/force_torque_sensor_topic"), force_torque_sensor_topic_, std::string("ft_sensor/raw"));
+    if (!nh_.hasParam("rsi/force_torque_sensor_topic"))
+    {
+      ROS_WARN("Cannot find parameter 'force_torque_sensor_topic' on the parameter server, using default "
+             "'ft_sensor/raw'");
+    }
+
+  } else {
+    ROS_INFO_STREAM_NAMED("kuka_hardware_interface", "'force_torque_sensor_frame_' not on paramter server. Support for force torque sensor disabled");
+    use_force_torque_sensor_ = false;
   }
 
   // Create ros_control interfaces
@@ -92,13 +94,17 @@ KukaHardwareInterface::KukaHardwareInterface() :
                                         &joint_position_command_[i]));
   }
 
-  force_torque_sensor_interface_.registerHandle(hardware_interface::ForceTorqueSensorHandle(
-      force_torque_sensor_topic_, force_torque_sensor_frame_, force_, torque_));
-
   // Register interfaces
   registerInterface(&joint_state_interface_);
   registerInterface(&position_joint_interface_);
-  registerInterface(&force_torque_sensor_interface_);
+
+  // Create and register force torque sensor interface if enabled
+  if (use_force_torque_sensor_) {
+    force_torque_sensor_interface_.registerHandle(hardware_interface::ForceTorqueSensorHandle(
+      force_torque_sensor_topic_, force_torque_sensor_frame_, force_, torque_));
+   registerInterface(&force_torque_sensor_interface_);
+  }
+
 
   ROS_INFO_STREAM_NAMED("hardware_interface", "Loaded kuka_rsi_hardware_interface");
 }
@@ -131,10 +137,12 @@ bool KukaHardwareInterface::read(const ros::Time time, const ros::Duration perio
   }
 
   // Update force and torque
-  for (std::size_t i = 0; i < 3; ++i)
-  {
-    force_[i] = rsi_state_.force[i];
-    torque_[i] = rsi_state_.torque[i];
+  if (use_force_torque_sensor_) {
+    for (std::size_t i = 0; i < 3; ++i)
+    {
+      force_[i] = rsi_state_.force[i];
+      torque_[i] = rsi_state_.torque[i];
+    }
   }
 
   // Update IPOC number

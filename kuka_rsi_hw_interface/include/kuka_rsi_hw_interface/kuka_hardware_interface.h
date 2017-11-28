@@ -81,7 +81,9 @@ private:
   // ROS node handle
   ros::NodeHandle nh_;
 
+  // Configuration
   unsigned int n_dof_;
+  bool use_force_torque_sensor_;
 
   std::vector<std::string> joint_names_;
   std::string force_torque_sensor_topic_;
