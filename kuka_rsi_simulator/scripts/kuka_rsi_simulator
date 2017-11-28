@@ -24,12 +24,13 @@ def create_rsi_xml_rob(act_joint_pos, setpoint_joint_pos, act_ext_joint_pos, set
                                   'A4':str(qd[3]), 'A5':str(qd[4]), 'A6':str(qd[5])})
 
     if external_axes:
+        rad2deg = 57.2958
         q = act_ext_joint_pos
         qd = setpoint_ext_joint_pos
-        ET.SubElement(root, 'EIPos', {'E1':str(q[0]), 'E2':str(q[1]), 'E3':str(q[2]),
-                                  'E4':str(q[3]), 'E5':str(q[4]), 'E6':str(q[5])})
-        ET.SubElement(root, 'ESPos', {'E1':str(qd[0]), 'E2':str(qd[1]), 'E3':str(qd[2]),
-                                  'E4':str(qd[3]), 'E5':str(qd[4]), 'E6':str(qd[5])})
+        ET.SubElement(root, 'EIPos', {'E1':str(q[0] * rad2deg), 'E2':str(q[1] * rad2deg), 'E3':str(q[2] * rad2deg),
+                                  'E4':str(q[3] * rad2deg), 'E5':str(q[4] * rad2deg), 'E6':str(q[5] * rad2deg)})
+        ET.SubElement(root, 'ESPos', {'E1':str(qd[0] * rad2deg), 'E2':str(qd[1] * rad2deg), 'E3':str(qd[2] * rad2deg),
+                                  'E4':str(qd[3] * rad2deg), 'E5':str(qd[4] * rad2deg), 'E6':str(qd[5] * rad2deg)})
 
     ET.SubElement(root, 'Delay', {'D':str(timeout_count)})
     ET.SubElement(root, 'IPOC').text=str(ipoc)

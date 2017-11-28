@@ -116,6 +116,7 @@ bool KukaHardwareInterface::read(const ros::Time time, const ros::Duration perio
 
   for (std::size_t i = 6; i < n_dof_; ++i)
   {
+    // Linear axes from KRC comes as [mm*RAD2DEG]
     joint_position_[i] = DEG2RAD * rsi_state_.positions[i] / 1000;
   }
 
@@ -135,7 +136,8 @@ bool KukaHardwareInterface::write(const ros::Time time, const ros::Duration peri
 
   for (std::size_t i = 6; i < n_dof_; ++i)
   {
-    rsi_joint_position_corrections_[i] = (1000 * RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i];
+    // Linear axes expect units in [mm]
+    rsi_joint_position_corrections_[i] = 1000 * (joint_position_command_[i] - rsi_initial_joint_positions_[i]);
   }
 
   out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, external_axes_).xml_doc;
@@ -176,7 +178,11 @@ void KukaHardwareInterface::start()
   {
     joint_position_[i] = DEG2RAD * rsi_state_.positions[i] / 1000;
     joint_position_command_[i] = joint_position_[i];
-    rsi_initial_joint_positions_[i] = rsi_state_.initial_positions[i];
+
+    // Linear external axes have different send and recevice units.
+    // To KRC: [mm] From KRC: [mm * RAD2DEG]
+    // Store initial position in [m]
+    rsi_initial_joint_positions_[i] = joint_position_[i];
   }
 
   ipoc_ = rsi_state_.ipoc;
