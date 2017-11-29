@@ -96,6 +96,7 @@ private:
   RSICommand rsi_command_;
   std::vector<double> rsi_initial_joint_positions_;
   std::vector<double> rsi_joint_position_corrections_;
+  std::vector<double> rsi_tcp_position_corrections_;
   unsigned long long ipoc_;
 
   std::unique_ptr<realtime_tools::RealtimePublisher<std_msgs::String> > rt_rsi_recv_;

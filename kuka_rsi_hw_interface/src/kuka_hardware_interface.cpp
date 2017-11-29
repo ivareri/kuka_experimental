@@ -48,7 +48,7 @@ namespace kuka_rsi_hw_interface
 KukaHardwareInterface::KukaHardwareInterface() :
     joint_position_(12, 0.0), joint_velocity_(12, 0.0), joint_effort_(12, 0.0), joint_position_command_(12, 0.0), joint_velocity_command_(
         12, 0.0), joint_effort_command_(12, 0.0), joint_names_(12), rsi_initial_joint_positions_(12, 0.0), rsi_joint_position_corrections_(
-        12, 0.0), ipoc_(0), n_dof_(6)
+        12, 0.0), rsi_tcp_position_corrections_(3, 0.0), ipoc_(0), n_dof_(6)
 {
   in_buffer_.resize(1024);
   out_buffer_.resize(1024);
@@ -134,13 +134,26 @@ bool KukaHardwareInterface::write(const ros::Time time, const ros::Duration peri
     rsi_joint_position_corrections_[i] = (RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i];
   }
 
-  for (std::size_t i = 6; i < n_dof_; ++i)
-  {
-    // Linear axes expect units in [mm]
-    rsi_joint_position_corrections_[i] = 1000 * (joint_position_command_[i] - rsi_initial_joint_positions_[i]);
-  }
+  
+  // With mathematically linked external axes, KRC will change robot joints to keep TCP static
+  // Update TCP by same amount as linear axes to avoid this. Units in [mm]
+  if (external_axes_) {
 
-  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, external_axes_).xml_doc;
+      // E1 & X
+      rsi_joint_position_corrections_[6] = 1000 * (joint_position_command_[6] - rsi_initial_joint_positions_[6]);
+      rsi_tcp_position_corrections_[0] = -rsi_joint_position_corrections_[6];
+
+      // E2 & Y
+      rsi_joint_position_corrections_[7] = 1000 * (joint_position_command_[7] - rsi_initial_joint_positions_[7]);
+      rsi_tcp_position_corrections_[1] = -rsi_joint_position_corrections_[7];
+
+      // E3 & Z
+      rsi_joint_position_corrections_[8] = 1000 * (joint_position_command_[8] - rsi_initial_joint_positions_[8]);
+      rsi_tcp_position_corrections_[2] = rsi_joint_position_corrections_[8];
+
+  }
+  
+  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, rsi_tcp_position_corrections_, external_axes_).xml_doc;
   server_->send(out_buffer_);
 
   if(rt_rsi_send_->trylock()) {
@@ -158,7 +171,6 @@ void KukaHardwareInterface::start()
   ROS_INFO_STREAM_NAMED("kuka_hardware_interface", "Waiting for robot!");
 
   int bytes = server_->recv(in_buffer_);
-  bytes = server_->recv(in_buffer_);
 
   // Drop empty <rob> frame with RSI <= 2.3
   if (bytes < 100)
@@ -186,7 +198,7 @@ void KukaHardwareInterface::start()
   }
 
   ipoc_ = rsi_state_.ipoc;
-  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, external_axes_).xml_doc;
+  out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_, rsi_tcp_position_corrections_, external_axes_).xml_doc;
   server_->send(out_buffer_);
   // Set receive timeout to 1 second
   server_->set_timeout(1000);
