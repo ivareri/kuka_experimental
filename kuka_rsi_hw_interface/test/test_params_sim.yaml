@@ -1,3 +1,5 @@
+
 rsi:
   listen_address: "127.0.0.1"
   listen_port: 49152
+  force_torque_sensor_frame: "tool0"
