@@ -82,7 +82,7 @@ private:
   ros::NodeHandle nh_;
 
   // Configuration
-  unsigned int n_dof_;
+  int n_dof_;
   bool use_force_torque_sensor_;
   bool external_axes_;
 
