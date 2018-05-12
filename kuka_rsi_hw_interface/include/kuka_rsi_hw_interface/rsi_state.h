@@ -156,6 +156,7 @@ RSIState::RSIState(std::string xml_doc) :
     ESPos_el->Attribute("E4", &initial_positions[9]);
     ESPos_el->Attribute("E5", &initial_positions[10]);
     ESPos_el->Attribute("E6", &initial_positions[11]);
+  }
   // Get FT data if available
   TiXmlElement* FTC_el = rob->FirstChildElement("FTC");
   if (FTC_el)
