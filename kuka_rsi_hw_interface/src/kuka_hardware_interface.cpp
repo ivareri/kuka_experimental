@@ -134,7 +134,6 @@ bool KukaHardwareInterface::read(const ros::Time time, const ros::Duration perio
   }
 
   rsi_state_ = RSIState(in_buffer_);
-<<<<<<< .merge_file_HUBJWj
 
   // Update joint positions
   for (std::size_t i = 0; i < 6; ++i)
